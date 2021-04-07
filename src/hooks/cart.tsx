@@ -31,14 +31,31 @@ const CartProvider: React.FC = ({ children }) => {
   useEffect(() => {
     async function loadProducts(): Promise<void> {
       // TODO LOAD ITEMS FROM ASYNC STORAGE
+      const productsInitials = await AsyncStorage.getItem('@Cart');
+      if (productsInitials) {
+        const productsInitialsArray = JSON.parse(productsInitials);
+        setProducts(productsInitialsArray);
+      }
     }
 
     loadProducts();
   }, []);
 
-  const addToCart = useCallback(async product => {
-    // TODO ADD A NEW ITEM TO THE CART
-  }, []);
+  const addToCart = useCallback(
+    async (product: Product) => {
+      // TODO ADD A NEW ITEM TO THE CART
+      if (product) {
+        const newProduct = Object.assign(product, { quantity: 1 });
+        const newProducts = products.map(item => {
+          return item;
+        });
+        newProducts.push(newProduct);
+
+        await AsyncStorage.setItem('@Cart', JSON.stringify(products));
+      }
+    },
+    [products],
+  );
 
   const increment = useCallback(async id => {
     // TODO INCREMENTS A PRODUCT QUANTITY IN THE CART
