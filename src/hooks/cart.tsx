@@ -31,10 +31,9 @@ const CartProvider: React.FC = ({ children }) => {
   useEffect(() => {
     async function loadProducts(): Promise<void> {
       // TODO LOAD ITEMS FROM ASYNC STORAGE
-      const productsInitials = await AsyncStorage.getItem('@Cart');
+      const productsInitials = await AsyncStorage.getItem('@Cart:products');
       if (productsInitials) {
-        const productsInitialsArray = JSON.parse(productsInitials);
-        setProducts(productsInitialsArray);
+        setProducts([...JSON.parse(productsInitials)]);
       }
     }
 
@@ -44,18 +43,26 @@ const CartProvider: React.FC = ({ children }) => {
   const addToCart = useCallback(
     async (product: Product) => {
       // TODO ADD A NEW ITEM TO THE CART
-      if (product) {
-        const newProduct = Object.assign(product, { quantity: 1 });
-        const newProducts = products.map(item => {
-          return item;
-        });
-        newProducts.push(newProduct);
+      const itemExist = products.find(item => item.id === product.id);
 
-        await AsyncStorage.setItem('@Cart', JSON.stringify(products));
+      if (itemExist) {
+        setProducts(
+          products.map(item =>
+            item.id === product.id
+              ? { ...product, quantity: item.quantity + 1 }
+              : item,
+          ),
+        );
+      } else {
+        setProducts([...products, { ...product, quantity: 1 }]);
       }
+
+      await AsyncStorage.setItem('@Cart:products', JSON.stringify(products));
     },
     [products],
   );
+
+  // tempo de vídeo 23:50
 
   const increment = useCallback(async id => {
     // TODO INCREMENTS A PRODUCT QUANTITY IN THE CART
